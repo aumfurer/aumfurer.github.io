@@ -132,10 +132,10 @@ class CardPainter {
     }
 
     paintImg() {
-        this.ctx.save()
         const img = this.imgs['img']
         if (!img)
             return
+        this.ctx.save()
         const spaceWidth = this.WIDTH - 2 * this.IMG.border
         const scale = Math.max(spaceWidth / img.width, this.IMG.height / img.height) * this.data.zoom
         this.ctx.save()
