@@ -27,19 +27,26 @@ class CardPainter {
 
     COST = {x: 65, y: 845, fontSize: 65}
     PREVIEW = {x: 50, y: 110, fontSize: 60}
-    ART = {x: 70, y: 880, fontSize: 20}
-    VERSION = {x: 530, y: 880, fontSize: 20}
+    ART = {x: 70, y: 880, fontSize: 20, color: 'white'}
+    VERSION = {x: 530, y: 880, fontSize: 20, color: 'white'}
+
+    EXPANSION = {x: 515, y: 805, width: 40}
 
     IMG = {border: 50, top: 120, height: 360}
 
     costSize = 0
     previewSize = 0
 
+    _dw = null
+
     constructor(ctx, data, images) {
         this.data = data;
         this.ctx = ctx
         this.imgs = images
-        this.dw = new DescriptionWriter(this.ctx, this.data.description, this.DESCRIPTION_CONFIG)
+    }
+
+    get dw() {
+        return this._dw || (this._dw = new DescriptionWriter(this.ctx, this.data.description, this.DESCRIPTION_CONFIG))
     }
 
     paintedColoredImg(img, color, filter) {
@@ -49,8 +56,8 @@ class CardPainter {
         let ctx = canvas.getContext("2d");
         ctx.globalCompositeOperation = filter;
         ctx.fillStyle = color;
-        ctx.drawImage(this.imgs[img], 0, 0);
         ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
+        ctx.drawImage(this.imgs[img], 0, 0);
         ctx.globalCompositeOperation = 'destination-in';
         ctx.drawImage(this.imgs[img], 0, 0);
         return canvas
@@ -143,7 +150,7 @@ class CardPainter {
 
     writeArt() {
         this.ctx.save()
-        this.ctx.fillStyle = 'white'
+        this.ctx.fillStyle = this.ART.color
         this.ctx.font = 'bold ' + this.ART.fontSize + "px Roman";
         this.ctx.fillText(this.data.art, this.ART.x, this.ART.y)
         this.ctx.restore()
@@ -151,10 +158,22 @@ class CardPainter {
 
     writeVersion() {
         this.ctx.save()
-        this.ctx.fillStyle = 'white'
+        this.ctx.fillStyle = this.VERSION.color
         this.ctx.textAlign = 'right'
         this.ctx.font = 'bold ' + this.VERSION.fontSize + "px Roman";
         this.ctx.fillText(this.data.version, this.VERSION.x, this.VERSION.y)
+        this.ctx.restore()
+    }
+
+    paintExpansion() {
+        const exp = this.imgs['exp']
+        if (!exp)
+            return
+        const scale = this.EXPANSION.width / Math.max(exp.width,  exp.height) * this.data.zoom
+        this.ctx.save()
+        this.ctx.translate(this.EXPANSION.x, this.EXPANSION.y)
+        this.ctx.scale(scale, scale)
+        this.ctx.drawImage(exp, 0, 0)
         this.ctx.restore()
     }
 
@@ -168,6 +187,7 @@ class CardPainter {
         this.writePreview()
         this.writeTypes()
         this.dw.writeText()
+        this.paintExpansion()
         this.writeArt()
         this.writeVersion()
         this.ctx.restore()
@@ -183,6 +203,8 @@ class HorizontalCardPainter extends CardPainter {
     BORDER_UNCOLORED = 'imeu'
     BORDER_UNCOLORED_2 = 'imeu2'
 
+    IMG = {border: 130, top: 218, height: 730}
+
     TITLE = {
         y: 185,
         fontSize: 90,
@@ -196,6 +218,12 @@ class HorizontalCardPainter extends CardPainter {
 
     COST = {x: 135, y: 255, fontSize: 155}
 
+    DESCRIPTION_CONFIG = {x: 160, y: 950, width: 1831, height: 285, fontSize: 80}
+
+    ART = {x: 180, y: 1295, fontSize: 50, color: 'black'}
+    VERSION = {x: 1971, y: 1295, fontSize: 50, color: 'black'}
+
+    EXPANSION = {x: 1895, y: 1165, width: 80}
 
     writeTypes() {
         this.ctx.save()
@@ -208,8 +236,8 @@ class HorizontalCardPainter extends CardPainter {
 
     paintBaseCard() {
         super.paintBaseCard()
-        // this.ctx.drawImage(this.imgs[this.BORDER_UNCOLORED_2], 0, 0)
-        this.ctx.drawImage(this.paintedColoredImg(this.BORDER_UNCOLORED_2, this.data.color[0], this.data.filter[0]), 0, 0)
+        let filter = this.data.filter[0] === 'screen' ? 'overlay': this.data.filter[0]
+        this.ctx.drawImage(this.paintedColoredImg(this.BORDER_UNCOLORED_2, this.data.color[0], filter), 0, 0)
 
     }
 

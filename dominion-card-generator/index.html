@@ -4,8 +4,6 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="UTF-8">
     <title>Document</title>
-    <link href="https://www.dafontfree.net/embed/bWluaW9uLXN0ZC1ibGFjayZkYXRhLzQ4L20vNDYwNjkvTWluaW9uU3RkLUJsYWNrLm90Zg"
-          rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
@@ -52,6 +50,8 @@
                 <input type="range" v-model='deltaX' id="deltaX" min="-1" max="1" step="0.05">
                 <label for="deltaY">Y:</label>
                 <input type="range" v-model='deltaY' id="deltaY" min="-1" max="1" step="0.05">
+                <label for="expansion">Expansion:</label>
+                <input type="text" v-model='expansion' id="expansion">
             </div>
             <div class="panel">
                 <label for="art">Art:</label><input type="text" v-model='art' id="art">
@@ -115,13 +115,13 @@
         {name: 'Curse', color: '#d999ff'},
         {name: 'Duration', color: '#ffcc66'},
         {name: 'Landmark', color: '#9bffb7'},
-        {name: 'Night', color: '#d46673'},
+        {name: 'Night', color: '#4d6673'},
         {name: 'Project', color: '#fb9d9c'},
         {name: 'Reaction', color: '#a6cce6'},
         {name: 'Reserve', color: '#e6bf80'},
         {name: 'Ruins', color: '#bf9959'},
         {name: 'Shelter', color: '#FFa680', priority: -1},
-        {name: 'State', color: '#BD7E7D', filter: "overlay",},
+        {name: 'State', color: '#A21D06', filter: "screen"},
         {name: 'Treasure', color: '#fff28c'},
         {name: 'Victory', color: '#bfe6a6'},
         {name: 'CUSTOM'},
@@ -138,7 +138,8 @@
         '$': "img/Coin.png",
         '@': "img/Debt.png",
         '^': "img/Potion.png",
-        img: ''
+        img: '',
+        exp: '',
     }
 
     function loadImage(url) {
@@ -176,19 +177,20 @@
                 description: urlParams.get('description') ?? '',
                 cost: urlParams.get('cost') ?? '',
                 preview: urlParams.get('preview') ?? '',
-                image: urlParams.get('image') ?? 'http://wiki.dominionstrategy.com/images/8/86/BattlefieldArt.jpg',
+                image: urlParams.get('image') ?? '',
+                expansion: urlParams.get('expansion') ?? '',
                 zoom: urlParams.get('zoom') ?? 1,
                 deltaX: urlParams.get('deltaX') ?? 0,
                 deltaY: urlParams.get('deltaY') ?? 0,
                 art: urlParams.get('art') ?? "",
-                version: urlParams.get('version') ?? "v1.0.0",
+                version: urlParams.get('version') ?? '',
                 colorTemplate: urlParams.get('colorTemplate')?.split(',') ?? ['Action', 'SAME']
             }
         },
         methods: {
             async paintAll() {
                 await loadFonts(['Token', 'Trajan Pro'])
-                let images = await loadImages({...IMAGES, img: this.image})
+                let images = await loadImages({...IMAGES, img: this.image, exp: this.expansion})
                 TokenIcon.img = images
                 let ctx = this.$refs.canvas.getContext("2d");
                 ctx.imageSmoothingQuality = 'high'
