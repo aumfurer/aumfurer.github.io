@@ -54,10 +54,13 @@ class CardPainter {
         canvas.width = this.WIDTH
         canvas.height = this.HEIGHT
         let ctx = canvas.getContext("2d");
-        ctx.globalCompositeOperation = filter;
+        ctx.globalCompositeOperation = filter.replace("*", '');
         ctx.fillStyle = color;
-        ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
+        if (!filter.endsWith('*'))
+            ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
         ctx.drawImage(this.imgs[img], 0, 0);
+        if (filter.endsWith('*'))
+            ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
         ctx.globalCompositeOperation = 'destination-in';
         ctx.drawImage(this.imgs[img], 0, 0);
         return canvas
@@ -169,7 +172,7 @@ class CardPainter {
         const exp = this.imgs['exp']
         if (!exp)
             return
-        const scale = this.EXPANSION.width / Math.max(exp.width,  exp.height) * this.data.zoom
+        const scale = this.EXPANSION.width / Math.max(exp.width, exp.height) * this.data.zoom
         this.ctx.save()
         this.ctx.translate(this.EXPANSION.x, this.EXPANSION.y)
         this.ctx.scale(scale, scale)
@@ -205,16 +208,8 @@ class HorizontalCardPainter extends CardPainter {
 
     IMG = {border: 130, top: 218, height: 730}
 
-    TITLE = {
-        y: 185,
-        fontSize: 90,
-        maxWidth: 800,
-    }
-    TYPES = {
-        y: 0,
-        fontSize: 120,
-        maxWidth: 255,
-    }
+    TITLE = {y: 185, fontSize: 90, maxWidth: 800}
+    TYPES = {y: 0, fontSize: 120, maxWidth: 255,}
 
     COST = {x: 135, y: 255, fontSize: 155}
 
@@ -236,9 +231,8 @@ class HorizontalCardPainter extends CardPainter {
 
     paintBaseCard() {
         super.paintBaseCard()
-        let filter = this.data.filter[0] === 'screen' ? 'overlay': this.data.filter[0]
+        let filter = this.data.filter[0] === 'screen' ? 'overlay' : this.data.filter[0]
         this.ctx.drawImage(this.paintedColoredImg(this.BORDER_UNCOLORED_2, this.data.color[0], filter), 0, 0)
-
     }
 
     writePreview() {
