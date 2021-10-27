@@ -74,7 +74,7 @@
                         <input type="color" v-model="color[i]" :id="'color'+(i+1)">
                         <div :style="{color: visibleTextColor(color[i])}">{{color[i].toUpperCase()}}</div>
                     </div>
-                    <select @change="setColor(i, $event.target.value)" v-model.number="colorTemplate[i]">
+                    <select @change="setColor(i, $event.target.value)" :value="colorStyle(i)">
                         <option v-for="color in COLORS.slice(1-i)" :value="color.name">{{color.name}}</option>
                     </select>
                 </div>
@@ -91,13 +91,16 @@
                     <option value="color-burn">Color Burn</option>
                     <option value="color-burn*">Color Burn (inv)</option>
                     <option value="color-dodge">Color Dodge</option>
-                    <option value="lighter">Lighter</option>
                 </select>
             </div>
         </div>
     </form>
     <div>
-        <canvas :class="template" id="canvas" ref="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
+        <canvas id="canvas" ref="canvas"
+                :class="template"
+                :width="canvasWidth" :height="canvasHeight"
+                @click="paintAll()"
+        ></canvas>
     </div>
 </div>
 
@@ -108,36 +111,41 @@
 <script>
 
     const TEMPLATES = {
-        Vertical: {width: 600, height: 920, factory: CardPainter},
+        Vertical: {width: 1403, height: 2151, factory: CardPainter},
         Horizontal: {width: 2151, height: 1403, factory: HorizontalCardPainter},
     }
 
     const COLORS = [
         {name: 'SAME', filter: 'hidden'},
         {name: 'Action', color: '#ffffff'},
+        {name: 'Boon', color: '#b39c38', filter: 'overlay'},
         {name: 'Curse', color: '#d999ff'},
         {name: 'Duration', color: '#ffcc66'},
-        {name: 'Landmark', color: '#9bffb7'},
+        {name: 'Event', color: '#dddddd'},
+        {name: 'Hex', color: '#9d7ac1'},
+        {name: 'Landmark', color: '#25773c', filter: "soft-light"},
         {name: 'Night', color: '#4d6673'},
         {name: 'Project', color: '#fb9d9c'},
         {name: 'Reaction', color: '#a6cce6'},
         {name: 'Reserve', color: '#e6bf80'},
         {name: 'Ruins', color: '#bf9959'},
         {name: 'Shelter', color: '#FFa680', priority: -1},
-        {name: 'State', color: '#A21D06', filter: "screen"},
+        {name: 'State', color: '#c66638', filter: "screen"},
         {name: 'Treasure', color: '#fff28c'},
         {name: 'Victory', color: '#bfe6a6'},
         {name: 'CUSTOM'},
     ]
 
     const IMAGES = {
-        im1: "img/CardColorOne.png",
-        im2: "img/CardColorTwo.png",
-        imu: "img/CardUncoloredDetails.png",
-        ime1: "img/EventColorOne.png",
-        ime2: "img/EventColorTwo.png",
-        imeu: "img/EventBrown.png",
-        imeu2: "img/EventBrown2.png",
+        vertical: "img/vertical.jpg",
+        verticalMask1: "img/vertical-1.png",
+        verticalMask2: "img/vertical-2.png",
+        verticalMaskUncolored: "img/vertical-uncolored.png",
+        horizontal: 'img/horizontal.jpg',
+        horizontalMask1: 'img/horizontal-1.png',
+        horizontalMask2: 'img/horizontal-2.png',
+        horizontalMaskUncolored: 'img/horizontal-uncolored.png',
+        horizontalBorder: 'img/horizontal-border.png',
         '$': "img/Coin.png",
         '@': "img/Debt.png",
         '^': "img/Potion.png",
@@ -186,22 +194,17 @@
                 deltaX: urlParams.get('deltaX') ?? 0,
                 deltaY: urlParams.get('deltaY') ?? 0,
                 art: urlParams.get('art') ?? "",
-                version: urlParams.get('version') ?? '',
-                colorTemplate: urlParams.get('colorTemplate')?.split(',') ?? ['Action', 'SAME']
+                version: urlParams.get('version') ?? ''
             }
         },
         methods: {
             async paintAll() {
-                await loadFonts(['Token', 'Trajan Pro'])
+                await loadFonts(['Token', 'Trajan Pro'  ])
                 let images = await loadImages({...IMAGES, img: this.image, exp: this.expansion})
                 TokenIcon.img = images
                 let ctx = this.$refs.canvas.getContext("2d");
-                ctx.imageSmoothingQuality = 'high'
-                ctx.save()
-                ctx.scale(this.scale, this.scale)
                 let cp = new (TEMPLATES[this.template].factory)(ctx, this.$data, images)
                 cp.paint()
-                ctx.restore()
                 this.saveQuery()
             },
             visibleTextColor(color) {
@@ -240,8 +243,15 @@
                 newParams.delete('width')
                 newParams.delete('height')
                 newUrlQuery = window.location.href.split('?')[0] + '?' + newParams.toString()
+            },
+            colorStyle(i){
+                return COLORS.find(c =>
+                    c.color?.toLowerCase() === this.color[i].toLowerCase() &&
+                    (c.filter || 'multiply') === this.filter[i].toLowerCase()
+                )?.name || 'CUSTOM'
             }
         },
+
         computed: {
             canvasWidth() {
                 return (TEMPLATES[this.template].width * this.scale | 0) + 'px'

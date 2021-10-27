@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.cdnfonts.com/css/trajan-pro');
 
 @font-face {
@@ -8,14 +9,13 @@
 
 @font-face {
     font-family: 'Roman';
-    src: local('Times New Roman'),
-    local("Norasi");
+    src: local('Times New Roman');
 }
 
-body, html { height: 100%; width: 100% }
-
-img {
-    display: none;
+body, html {
+    height: 100%;
+    width: 100%;
+    font-family: Amiri,  sans-serif
 }
 
 #canvas.Vertical {
@@ -64,10 +64,12 @@ label {
     margin-top: 0.75em;
     font-family: 'Roman';
 }
+
 .types-container {
     display: flex;
     gap: 0.2em;
 }
+
 .types-container > input {
     width: 100%;
 }

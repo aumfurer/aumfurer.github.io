@@ -1,38 +1,39 @@
 class CardPainter {
-    WIDTH = 600
-    HEIGHT = 920
+    WIDTH = 1403
+    HEIGHT = 2151
 
-    BORDER_1 = 'im1'
-    BORDER_2 = 'im2'
-    BORDER_UNCOLORED = 'imu'
+    BASE = 'vertical'
+    MASK_1 = 'verticalMask1'
+    MASK_2 = 'verticalMask2'
+    MASK_UNCOLORED = 'verticalMaskUncolored'
 
     TITLE = {
-        y: 110,
-        fontSize: 50,
+        y: 257,
+        fontSize: 117,
         get maxWidth() {
-            return 480 - 2 * this._self.previewSize
+            return 1122 - 2 * this._self.previewSize
         },
         _self: this
     }
     TYPES = {
-        y: 840,
-        fontSize: 40,
+        y: 1964,
+        fontSize: 94,
         get maxWidth() {
-            return 450 - 2 * this._self.costSize
+            return 1052 - 2 * this._self.costSize
         },
         _self: this
     }
 
-    DESCRIPTION_CONFIG = {x: 72, y: 500, width: 456, height: 285, fontSize: 40}
+    DESCRIPTION_CONFIG = {x: 168, y: 1169, width: 1066, height: 666, fontSize: 94}
 
-    COST = {x: 65, y: 845, fontSize: 65}
-    PREVIEW = {x: 50, y: 110, fontSize: 60}
-    ART = {x: 70, y: 880, fontSize: 20, color: 'white'}
-    VERSION = {x: 530, y: 880, fontSize: 20, color: 'white'}
+    COST = {x: 152, y: 1976, fontSize: 152}
+    PREVIEW = {x: 117, y: 257, fontSize: 140}
+    ART = {x: 164, y: 2058, fontSize: 47, color: 'white'}
+    VERSION = {x: 1239, y: 2058, fontSize: 47, color: 'white'}
 
-    EXPANSION = {x: 515, y: 805, width: 40}
+    EXPANSION = {x: 1204, y: 1882, width: 94}
 
-    IMG = {border: 50, top: 120, height: 360}
+    IMG = {border: 117, top: 280, height: 842}
 
     costSize = 0
     previewSize = 0
@@ -56,10 +57,10 @@ class CardPainter {
         let ctx = canvas.getContext("2d");
         ctx.globalCompositeOperation = filter.replace("*", '');
         ctx.fillStyle = color;
-        if (!filter.endsWith('*'))
+        if (filter.length && !filter.endsWith('*'))
             ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-        ctx.drawImage(this.imgs[img], 0, 0);
-        if (filter.endsWith('*'))
+        ctx.drawImage(this.imgs[this.BASE], 0, 0);
+        if (filter.length && filter.endsWith('*'))
             ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
         ctx.globalCompositeOperation = 'destination-in';
         ctx.drawImage(this.imgs[img], 0, 0);
@@ -67,10 +68,10 @@ class CardPainter {
     }
 
     paintBaseCard() {
-        this.ctx.drawImage(this.paintedColoredImg(this.BORDER_1, this.data.color[0], this.data.filter[0]), 0, 0)
+        this.ctx.drawImage(this.paintedColoredImg(this.MASK_1, this.data.color[0], this.data.filter[0]), 0, 0)
         if (this.data.filter[1] !== 'hidden')
-            this.ctx.drawImage(this.paintedColoredImg(this.BORDER_2, this.data.color[1], this.data.filter[1]), 0, 0)
-        this.ctx.drawImage(this.imgs[this.BORDER_UNCOLORED], 0, 0)
+            this.ctx.drawImage(this.paintedColoredImg(this.MASK_2, this.data.color[1], this.data.filter[1]), 0, 0)
+        this.ctx.drawImage(this.paintedColoredImg(this.MASK_UNCOLORED, 'black', ''), 0, 0)
     }
 
     writeCenteredTrajanText(text, y, fontSize, maxWidth) {
@@ -182,6 +183,8 @@ class CardPainter {
 
     paint() {
         this.ctx.save()
+        const scale = this.ctx.canvas.width / this.WIDTH
+        this.ctx.scale(scale, scale)
         this.ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT)
         this.paintImg()
         this.paintBaseCard()
@@ -201,10 +204,11 @@ class HorizontalCardPainter extends CardPainter {
     WIDTH = 2151
     HEIGHT = 1403
 
-    BORDER_1 = 'ime1'
-    BORDER_2 = 'ime2'
-    BORDER_UNCOLORED = 'imeu'
-    BORDER_UNCOLORED_2 = 'imeu2'
+    BASE = 'horizontal'
+    MASK_1 = 'horizontalMask1'
+    MASK_2 = 'horizontalMask2'
+    MASK_UNCOLORED = 'horizontalMaskUncolored'
+    MASK_BORDER = 'horizontalBorder'
 
     IMG = {border: 130, top: 218, height: 730}
 
@@ -232,7 +236,7 @@ class HorizontalCardPainter extends CardPainter {
     paintBaseCard() {
         super.paintBaseCard()
         let filter = this.data.filter[0] === 'screen' ? 'overlay' : this.data.filter[0]
-        this.ctx.drawImage(this.paintedColoredImg(this.BORDER_UNCOLORED_2, this.data.color[0], filter), 0, 0)
+        this.ctx.drawImage(this.paintedColoredImg(this.MASK_BORDER, this.data.color[0], filter), 0, 0)
     }
 
     writePreview() {

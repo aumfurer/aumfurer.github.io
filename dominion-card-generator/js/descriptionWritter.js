@@ -1,11 +1,12 @@
 const TOKEN_PRIORITY = [TokenLine, TokenIconBig, TokenIcon, TokenKeyWordSingle, TokenKeyWord, JointToken, TokenWord]
 
+roman = fs => `${fs | 0}px Roman, Amiri`
 
 class TokenArray {
     /** @param {Token[]} tokens
      * @param {boolean} useSpaces
      */
-    constructor(tokens, useSpaces=true) {
+    constructor(tokens, useSpaces = true) {
         this.tokens = tokens
         this.spaceQty = tokens.reduce((acc, t, i) => {
             return acc + (i <= tokens.length - 2 && t.breaksAfter() && tokens[i + 1].breaksBefore())
@@ -53,7 +54,7 @@ class DescriptionWriter {
     }
 
     font() {
-        return `${this.fontSize | 0}px Roman`
+        return roman(this.fontSize)
     }
 
     writeText() {

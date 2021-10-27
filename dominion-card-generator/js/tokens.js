@@ -133,7 +133,7 @@ class TokenKeyWord extends TokenWord {
 
     width(ctx) {
         ctx.save()
-        ctx.font = `bold ${this.fontSize(ctx) | 0}px Roman`
+        ctx.font = `700 ${this.fontSize(ctx) | 0}px Roman, Amiri`
         let result = super.width(ctx)
         ctx.restore()
         return result
@@ -141,7 +141,7 @@ class TokenKeyWord extends TokenWord {
 
     paint(ctx, x, y) {
         ctx.save()
-        ctx.font = `bold ${this.fontSize(ctx) | 0}px Roman`
+        ctx.font = `700 ${this.fontSize(ctx) | 0}px Roman, Amiri`
         ctx.fillText(this.text, x, y)
         ctx.restore()
     }
