@@ -15,7 +15,7 @@
 body, html {
     height: 100%;
     width: 100%;
-    font-family: Amiri,  sans-serif
+    font-family: Amiri, sans-serif
 }
 
 #canvas.Vertical {
@@ -122,4 +122,8 @@ input[type='range'] {
 
 input[type='range'] + label {
     margin-top: 0.1em;
+}
+
+[v-cloak] {
+    display: none;
 }

@@ -7,7 +7,12 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14" defer></script>
+<script src="js/tokens.js" defer></script>
+<script src="js/descriptionWritter.js" defer></script>
+<script src="js/cardPainter.js" defer></script>
+
 <div id="app">
     <form class="data" @input="paintAll()">
         <div class="section">
@@ -17,7 +22,7 @@
             <div class="panel">
                 <label for="template">Template:</label>
                 <select id="template" v-model="template">
-                    <option v-for="name in Object.keys(TEMPLATES)" :value="name">{{name}}</option>
+                    <option v-for="name in templates" :value="name">{{name}}</option>
                 </select>
             </div>
         </div>
@@ -66,7 +71,7 @@
             </div>
         </div>
 
-        <div class="section">
+        <div class="section" v-cloak>
             <div class="panel" v-for="i in [0, 1]">
                 <label class='color-input' :for="'color'+(i+1)">Color {{i + 1}}</label>
                 <div class="section">
@@ -111,15 +116,13 @@
     </div>
 </div>
 
-<script src="js/tokens.js"></script>
-<script src="js/descriptionWritter.js"></script>
-<script src="js/cardPainter.js"></script>
-
 <script>
 
-    const TEMPLATES = {
-        Vertical: {factory: VerticalCardPainter},
-        Horizontal: {factory: HorizontalCardPainter},
+    function configTemplates(){
+        return {
+            Vertical: VerticalCardPainter,
+            Horizontal: HorizontalCardPainter,
+        }
     }
 
     const COLORS = [
@@ -187,106 +190,115 @@
         )
     }
 
-    let app = new Vue({
-        el: '#app',
-        data() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return {
-                template: urlParams.get('template') ?? 'Vertical',
-                name: urlParams.get('name') ?? '',
-                types: urlParams.get('types') ?? '',
-                color: urlParams.get('color')?.split(',') ?? ['#ffffff', '#ffffff'],
-                filter: urlParams.get('filter')?.split(',') ?? ["multiply", "hidden"],
-                scale: urlParams.get('scale') ?? 1,
-                description: urlParams.get('description') ?? '',
-                cost: urlParams.get('cost') ?? '',
-                preview: urlParams.get('preview') ?? '',
-                image: urlParams.get('image') ?? '',
-                expansion: urlParams.get('expansion') ?? '',
-                zoom: urlParams.get('zoom') ?? 1,
-                deltaX: urlParams.get('deltaX') ?? 0,
-                deltaY: urlParams.get('deltaY') ?? 0,
-                art: urlParams.get('art') ?? "",
-                version: urlParams.get('version') ?? '',
-                variation: urlParams.get('variation') ?? 'normal',
-            }
-        },
-        methods: {
-            async paintAll() {
-                const extra_imgs = await loadImages({img: this.image, exp: this.expansion})
-                await FONT_PROMISE
-                const base_imgs = await IMGS_PROMISE
-                const images = {...base_imgs, ...extra_imgs}
-                TokenIcon.img = images
-                let ctx = this.$refs.canvas.getContext("2d");
-                let cp = new (TEMPLATES[this.template].factory)(ctx, this.$data, images)
-                cp.paint()
-                this.saveQuery()
-            },
-            visibleTextColor(color) {
-                const [r, g, b] = [1, 3, 5].map(i => Number.parseInt(color.charAt(i), 16))
-                const value = 0.21 * r + 0.72 * g + 0.072 * b;
-                return value < 7 ? 'white' : 'black'
-            },
-            setColor(i, name) {
-                if (name === 'CUSTOM')
-                    return
-                const color = COLORS.find(c => c['name'] === name)
-                Vue.set(this.color, i, color.color || this.color[i])
-                Vue.set(this.filter, i, color.filter || 'multiply')
-                if (i === 1)
-                    this.variation = color.variation || 'normal'
-            },
-            async colorsFromTypes() {
-                const types = this.types.split(' - ')
-                let colored = COLORS.filter(c => types.find(t => c.name.toLowerCase() === t.toLowerCase()))
-                let actionIx = colored.findIndex(c => c.name === 'Action');
-                let hideAction = actionIx > -1 && colored.find(c => c.name.startsWith('R') || c.name === "Duration")
-                if (hideAction)
-                    colored = colored.slice(0, actionIx).concat(colored.slice(actionIx + 1))
-
-                const priority = c => c.priority || COLORS.indexOf(c)
-                colored.sort((a, b) => priority(a) - priority(b))
-
-                if (colored.length) {
-                    colored.push(COLORS[0])
-                    this.setColor(0, colored[0].name)
-                    this.setColor(1, colored[1].name)
-                }
-                await this.paintAll()
-            },
-            saveQuery() {
+    function createApp() {
+        const TEMPLATES = configTemplates()
+        return new Vue({
+            el: '#app',
+            data() {
                 const urlParams = new URLSearchParams(window.location.search);
-                const newParams = new URLSearchParams({...Object.fromEntries(urlParams.entries()), ...this.$data})
-                newUrlQuery = window.location.href.split('?')[0] + '?' + newParams.toString()
+                return {
+                    template: urlParams.get('template') ?? 'Vertical',
+                    name: urlParams.get('name') ?? '',
+                    types: urlParams.get('types') ?? '',
+                    color: urlParams.get('color')?.split(',') ?? ['#ffffff', '#ffffff'],
+                    filter: urlParams.get('filter')?.split(',') ?? ["multiply", "hidden"],
+                    scale: urlParams.get('scale') ?? 1,
+                    description: urlParams.get('description') ?? '',
+                    cost: urlParams.get('cost') ?? '',
+                    preview: urlParams.get('preview') ?? '',
+                    image: urlParams.get('image') ?? '',
+                    expansion: urlParams.get('expansion') ?? '',
+                    zoom: urlParams.get('zoom') ?? 1,
+                    deltaX: urlParams.get('deltaX') ?? 0,
+                    deltaY: urlParams.get('deltaY') ?? 0,
+                    art: urlParams.get('art') ?? "",
+                    version: urlParams.get('version') ?? '',
+                    variation: urlParams.get('variation') ?? 'normal',
+                }
             },
-            colorStyle(i) {
-                if (this.filter[i] === 'hidden')
-                    return 'SAME'
-                return COLORS.find(c =>
-                    c.color?.toLowerCase() === this.color[i].toLowerCase() &&
-                    (c.filter || 'multiply') === this.filter[i].toLowerCase()
-                )?.name || 'CUSTOM'
-            }
-        },
+            methods: {
+                async paintAll() {
+                    const extra_imgs = await loadImages({img: this.image, exp: this.expansion})
+                    await FONT_PROMISE
+                    const base_imgs = await IMGS_PROMISE
+                    const images = {...base_imgs, ...extra_imgs}
+                    TokenIcon.img = images
+                    let ctx = this.$refs.canvas.getContext("2d");
+                    let cp = new TEMPLATES[this.template](ctx, this.$data, images)
+                    cp.paint()
+                    this.saveQuery()
+                },
+                visibleTextColor(color) {
+                    const [r, g, b] = [1, 3, 5].map(i => Number.parseInt(color.charAt(i), 16))
+                    const value = 0.21 * r + 0.72 * g + 0.072 * b;
+                    return value < 7 ? 'white' : 'black'
+                },
+                setColor(i, name) {
+                    if (name === 'CUSTOM')
+                        return
+                    const color = COLORS.find(c => c['name'] === name)
+                    Vue.set(this.color, i, color.color || this.color[i])
+                    Vue.set(this.filter, i, color.filter || 'multiply')
+                    if (i === 1)
+                        this.variation = color.variation || 'normal'
+                },
+                async colorsFromTypes() {
+                    const types = this.types.split(' - ')
+                    let colored = COLORS.filter(c => types.find(t => c.name.toLowerCase() === t.toLowerCase()))
+                    let actionIx = colored.findIndex(c => c.name === 'Action');
+                    let hideAction = actionIx > -1 && colored.find(c => c.name.startsWith('R') || c.name === "Duration")
+                    if (hideAction)
+                        colored = colored.slice(0, actionIx).concat(colored.slice(actionIx + 1))
 
-        computed: {
-            canvasWidth() {
-                return (TEMPLATES[this.template].factory.WIDTH * this.scale | 0) + 'px'
+                    const priority = c => c.priority || COLORS.indexOf(c)
+                    colored.sort((a, b) => priority(a) - priority(b))
+
+                    if (colored.length) {
+                        colored.push(COLORS[0])
+                        this.setColor(0, colored[0].name)
+                        this.setColor(1, colored[1].name)
+                    }
+                    await this.paintAll()
+                },
+                saveQuery() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const newParams = new URLSearchParams({...Object.fromEntries(urlParams.entries()), ...this.$data})
+                    newUrlQuery = window.location.href.split('?')[0] + '?' + newParams.toString()
+                },
+                colorStyle(i) {
+                    if (this.filter[i] === 'hidden')
+                        return 'SAME'
+                    return COLORS.find(c =>
+                        c.color?.toLowerCase() === this.color[i].toLowerCase() &&
+                        (c.filter || 'multiply') === this.filter[i].toLowerCase()
+                    )?.name || 'CUSTOM'
+                }
             },
-            canvasHeight() {
-                return (TEMPLATES[this.template].factory.HEIGHT * this.scale | 0) + 'px'
+
+            computed: {
+                canvasWidth() {
+                    return (TEMPLATES[this.template].WIDTH * this.scale | 0) + 'px'
+                },
+                canvasHeight() {
+                    return (TEMPLATES[this.template].HEIGHT * this.scale | 0) + 'px'
+                },
+                showVariations() {
+                    return Object.keys(TEMPLATES[this.template].VARIATIONS).length >= 2
+                },
+                templates(){
+                    return Object.keys(TEMPLATES);
+                }
             },
-            showVariations() {
-                return Object.keys(TEMPLATES[this.template].factory.VARIATIONS).length >= 2
-            }
-        },
-    })
+        })
+    }
+
+    let app
 
     const FONT_PROMISE = loadFonts(['Token', 'Trajan Pro'])
     const IMGS_PROMISE = loadImages(IMAGES)
 
     window.addEventListener('load', () => {
+        app = createApp()
         app.paintAll()
     })
 
