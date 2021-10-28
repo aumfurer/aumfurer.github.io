@@ -95,6 +95,9 @@ class DescriptionWriter {
         let currentLine = []
         let currentWidth = 0
 
+        TokenLine.WIDTH = this.width * 0.8
+        TokenLine.THICKNESS = Math.min(this.width, this.height) / 100
+
         for (let i = 0; i < tokens.length; i++) {
             let bunch = [tokens[i]]
             while (i < tokens.length - 1 && !tokens[i].breaksBefore() && !tokens[i + 1].breaksAfter()) {

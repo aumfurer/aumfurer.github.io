@@ -163,6 +163,8 @@ class TokenKeyWordSingle extends TokenKeyWord {
 class TokenLine extends Token {
     static name = "TokenLine"
     static pattern = "^[-]$"
+    static WIDTH
+    static THICKNESS
 
     height(ctx) {
         return Number.parseInt(ctx.font.match(/(\d+)px/)[1]) * 0.6
@@ -170,7 +172,7 @@ class TokenLine extends Token {
 
     /** @param {CanvasRenderingContext2D} ctx */
     width(ctx) {
-        return ctx.canvas.width / 2
+        return this.constructor.WIDTH
     };
 
     /** @param {CanvasRenderingContext2D} ctx
@@ -178,7 +180,7 @@ class TokenLine extends Token {
      * @param {Number} y
      */
     paint(ctx, x, y) {
-        ctx.fillRect(x, y, this.width(ctx), 2)
+        ctx.fillRect(x, y, this.width(ctx), this.constructor.THICKNESS)
     };
 }
 
