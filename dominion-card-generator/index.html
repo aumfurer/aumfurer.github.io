@@ -118,7 +118,7 @@
 <script>
 
     const TEMPLATES = {
-        Vertical: {factory: CardPainter},
+        Vertical: {factory: VerticalCardPainter},
         Horizontal: {factory: HorizontalCardPainter},
     }
 
@@ -149,6 +149,7 @@
         verticalMask2: "img/vertical-2.png",
         verticalMask2Night: "img/vertical-2-night.png",
         verticalMaskUncolored: "img/vertical-uncolored.png",
+        verticalMaskFocus: 'img/vertical-focus.png',
         horizontal: 'img/horizontal.jpg',
         horizontalMask1: 'img/horizontal-1.png',
         horizontalMask2: 'img/horizontal-2.png',
@@ -254,6 +255,8 @@
                 newUrlQuery = window.location.href.split('?')[0] + '?' + newParams.toString()
             },
             colorStyle(i){
+                if (this.filter[i] === 'hidden')
+                    return 'SAME'
                 return COLORS.find(c =>
                     c.color?.toLowerCase() === this.color[i].toLowerCase() &&
                     (c.filter || 'multiply') === this.filter[i].toLowerCase()

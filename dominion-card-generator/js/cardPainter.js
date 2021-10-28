@@ -1,8 +1,6 @@
 class CardPainter {
-    static WIDTH = 1403
-    static HEIGHT = 2151
-
-
+    static WIDTH
+    static HEIGHT
 
     get WIDTH() {
         return this.constructor.WIDTH
@@ -16,49 +14,30 @@ class CardPainter {
     MASK_1 = 'verticalMask1'
     MASK_UNCOLORED = 'verticalMaskUncolored'
 
-    static VARIATIONS = {
-        normal: 'verticalMask2',
-        night: 'verticalMask2Night'
-    }
+    static VARIATIONS = {normal: ''}
 
-    TITLE = {
-        y: 257,
-        fontSize: 117,
-        get maxWidth() {
-            return 1122 - 2 * this._self.previewSize
-        },
-        _self: this
-    }
-    TYPES = {
-        y: 1964,
-        fontSize: 94,
-        get maxWidth() {
-            return 1052 - 2 * this._self.costSize
-        },
-        _self: this
-    }
+    TITLE = {y: 0, fontSize: 0, maxWidth: 0}
+    TYPES = {y: 0, fontSize: 0, maxWidth: 0}
 
-    DESCRIPTION_CONFIG = {x: 168, y: 1169, width: 1066, height: 666, fontSize: 94}
+    DESCRIPTION_CONFIG = {x: 0, y: 0, width: 0, height: 0, fontSize: 0}
 
-    COST = {x: 152, y: 1976, fontSize: 152}
-    PREVIEW = {x: 117, y: 257, fontSize: 140}
-    ART = {x: 164, y: 2058, fontSize: 47, color: 'white'}
-    VERSION = {x: 1239, y: 2058, fontSize: 47, color: 'white'}
-
-    EXPANSION = {x: 1204, y: 1882, width: 94}
-
-    IMG = {border: 117, top: 280, height: 842}
+    COST = {x: 0, y: 0, fontSize: 0}
+    PREVIEW = {x: 0, y: 0, fontSize: 0}
+    ART = {x: 0, y: 0, fontSize: 0, color: ''}
+    VERSION = {x: 0, y: 0, fontSize: 0, color: ''}
+    EXPANSION = {x: 0, y: 0, width: 0}
+    IMG = {border: 0, top: 0, height: 0}
 
     costSize = 0
     previewSize = 0
-
-    _dw = null
 
     constructor(ctx, data, images) {
         this.data = data;
         this.ctx = ctx
         this.imgs = images
     }
+
+    _dw = null
 
     get dw() {
         return this._dw || (this._dw = new DescriptionWriter(this.ctx, this.data.description, this.DESCRIPTION_CONFIG))
@@ -90,6 +69,16 @@ class CardPainter {
             this.ctx.drawImage(this.paintedColoredImg(mask, this.data.color[1], this.data.filter[1]), 0, 0)
         }
         this.ctx.drawImage(this.paintedColoredImg(this.MASK_UNCOLORED, 'black', ''), 0, 0)
+    }
+
+    _font_color(c) {
+        if (c === 1 && this.data.filter[c] === 'hidden')
+            return this._font_color(0)
+        if (this.data.filter[c] !== 'multiply')
+            return 'black'
+        const [r, g, b] = [1, 3, 5].map(i => Number.parseInt(this.data.color[c].charAt(i), 16))
+        const value = 0.21 * r + 0.72 * g + 0.072 * b;
+        return value < 7 ? 'white' : 'black'
     }
 
     writeCenteredTrajanText(text, y, fontSize, maxWidth) {
@@ -199,8 +188,13 @@ class CardPainter {
         this.ctx.restore()
     }
 
+    writeDescription() {
+        this.dw.writeText()
+    }
+
     paint() {
         this.ctx.save()
+        this.ctx.fillStyle = this._font_color(0)
         const scale = this.ctx.canvas.width / this.WIDTH
         this.ctx.scale(scale, scale)
         this.ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT)
@@ -210,13 +204,84 @@ class CardPainter {
         this.writeCost()
         this.writeName()
         this.writeTypes()
-        this.dw.writeText()
+        this.writeDescription();
         this.paintExpansion()
         this.writeArt()
         this.writeVersion()
         this.ctx.restore()
     }
 }
+
+class VerticalCardPainter extends CardPainter {
+
+    static WIDTH = 1403
+    static HEIGHT = 2151
+
+    get WIDTH() {
+        return this.constructor.WIDTH
+    }
+
+    get HEIGHT() {
+        return this.constructor.HEIGHT
+    }
+
+    BASE = 'vertical'
+    MASK_1 = 'verticalMask1'
+    MASK_UNCOLORED = 'verticalMaskUncolored'
+    MASK_FOCUS = 'verticalMaskFocus'
+
+    static VARIATIONS = {
+        normal: 'verticalMask2',
+        night: 'verticalMask2Night'
+    }
+
+    TITLE = {
+        y: 257,
+        fontSize: 117,
+        get maxWidth() {
+            return 1122 - 2 * this._self.previewSize
+        },
+        _self: this
+    }
+    TYPES = {
+        y: 1964,
+        fontSize: 94,
+        get maxWidth() {
+            return 1052 - 2 * this._self.costSize
+        },
+        _self: this
+    }
+
+    DESCRIPTION_CONFIG = {x: 168, y: 1169, width: 1066, height: 666, fontSize: 94}
+
+    COST = {x: 152, y: 1976, fontSize: 152}
+    PREVIEW = {x: 117, y: 257, fontSize: 140}
+    ART = {x: 164, y: 2058, fontSize: 47, color: 'white'}
+    VERSION = {x: 1239, y: 2058, fontSize: 47, color: 'white'}
+
+    EXPANSION = {x: 1204, y: 1882, width: 94}
+
+    IMG = {border: 117, top: 280, height: 842}
+
+    costSize = 0
+    previewSize = 0
+
+    writeDescription() {
+        this.ctx.save()
+        this.ctx.fillStyle = this._font_color(1)
+        super.writeDescription()
+        this.ctx.restore()
+    }
+
+
+    paintBaseCard() {
+        super.paintBaseCard();
+        if (this.data.filter[1] === 'hidden' && this.data.variation === 'normal'){
+            this.ctx.drawImage(this.paintedColoredImg(this.MASK_FOCUS, 'black', ''), 0, 0)
+        }
+    }
+}
+
 
 class HorizontalCardPainter extends CardPainter {
     static WIDTH = 2151
