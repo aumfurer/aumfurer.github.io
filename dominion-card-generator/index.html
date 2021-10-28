@@ -95,7 +95,7 @@
                     <option value="lighter40">Lighter 25%</option>
                 </select>
                 <label v-if="i===1 && showVariations" for="variation">Variation:</label>
-                <select v-if="i===1 && showVariations"  v-model="variation" @change="paintAll()" id="variation">
+                <select v-if="i===1 && showVariations" v-model="variation" @change="paintAll()" id="variation">
                     <option value="normal" v-if='i===1'>Normal</option>
                     <option value="night" v-if='i===1'>Night</option>
                 </select>
@@ -162,10 +162,14 @@
         exp: '',
     }
 
+    let img_cache = {}
+
     function loadImage(url) {
+        if (img_cache[url])
+            return new Promise(resolve => resolve(img_cache[url]))
         return new Promise(resolve => {
             const img = new Image();
-            img.addEventListener('load', () => resolve(img));
+            img.addEventListener('load', () => resolve(img_cache[url] = img));
             img.addEventListener('error', () => resolve());
             img.src = url;
         })
@@ -209,8 +213,10 @@
         },
         methods: {
             async paintAll() {
-                await loadFonts(['Token', 'Trajan Pro'  ])
-                let images = await loadImages({...IMAGES, img: this.image, exp: this.expansion})
+                const extra_imgs = await loadImages({img: this.image, exp: this.expansion})
+                await FONT_PROMISE
+                const base_imgs = await IMGS_PROMISE
+                const images = {...base_imgs, ...extra_imgs}
                 TokenIcon.img = images
                 let ctx = this.$refs.canvas.getContext("2d");
                 let cp = new (TEMPLATES[this.template].factory)(ctx, this.$data, images)
@@ -254,7 +260,7 @@
                 const newParams = new URLSearchParams({...Object.fromEntries(urlParams.entries()), ...this.$data})
                 newUrlQuery = window.location.href.split('?')[0] + '?' + newParams.toString()
             },
-            colorStyle(i){
+            colorStyle(i) {
                 if (this.filter[i] === 'hidden')
                     return 'SAME'
                 return COLORS.find(c =>
@@ -271,11 +277,14 @@
             canvasHeight() {
                 return (TEMPLATES[this.template].factory.HEIGHT * this.scale | 0) + 'px'
             },
-            showVariations(){
+            showVariations() {
                 return Object.keys(TEMPLATES[this.template].factory.VARIATIONS).length >= 2
             }
         },
     })
+
+    const FONT_PROMISE = loadFonts(['Token', 'Trajan Pro'])
+    const IMGS_PROMISE = loadImages(IMAGES)
 
     window.addEventListener('load', () => {
         app.paintAll()
