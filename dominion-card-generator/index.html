@@ -91,6 +91,13 @@
                     <option value="color-burn">Color Burn</option>
                     <option value="color-burn*">Color Burn (inv)</option>
                     <option value="color-dodge">Color Dodge</option>
+                    <option value="lighter80">Lighter 50%</option>
+                    <option value="lighter40">Lighter 25%</option>
+                </select>
+                <label v-if="i===1 && showVariations" for="variation">Variation:</label>
+                <select v-if="i===1 && showVariations"  v-model="variation" @change="paintAll()" id="variation">
+                    <option value="normal" v-if='i===1'>Normal</option>
+                    <option value="night" v-if='i===1'>Night</option>
                 </select>
             </div>
         </div>
@@ -111,8 +118,8 @@
 <script>
 
     const TEMPLATES = {
-        Vertical: {width: 1403, height: 2151, factory: CardPainter},
-        Horizontal: {width: 2151, height: 1403, factory: HorizontalCardPainter},
+        Vertical: {factory: CardPainter},
+        Horizontal: {factory: HorizontalCardPainter},
     }
 
     const COLORS = [
@@ -124,7 +131,7 @@
         {name: 'Event', color: '#dddddd'},
         {name: 'Hex', color: '#9d7ac1'},
         {name: 'Landmark', color: '#25773c', filter: "soft-light"},
-        {name: 'Night', color: '#4d6673'},
+        {name: 'Night', color: '#4d6673', variation: "night"},
         {name: 'Project', color: '#fb9d9c'},
         {name: 'Reaction', color: '#a6cce6'},
         {name: 'Reserve', color: '#e6bf80'},
@@ -140,6 +147,7 @@
         vertical: "img/vertical.jpg",
         verticalMask1: "img/vertical-1.png",
         verticalMask2: "img/vertical-2.png",
+        verticalMask2Night: "img/vertical-2-night.png",
         verticalMaskUncolored: "img/vertical-uncolored.png",
         horizontal: 'img/horizontal.jpg',
         horizontalMask1: 'img/horizontal-1.png',
@@ -194,7 +202,8 @@
                 deltaX: urlParams.get('deltaX') ?? 0,
                 deltaY: urlParams.get('deltaY') ?? 0,
                 art: urlParams.get('art') ?? "",
-                version: urlParams.get('version') ?? ''
+                version: urlParams.get('version') ?? '',
+                variation: urlParams.get('variation') ?? 'normal',
             }
         },
         methods: {
@@ -218,6 +227,8 @@
                 const color = COLORS.find(c => c['name'] === name)
                 Vue.set(this.color, i, color.color || this.color[i])
                 Vue.set(this.filter, i, color.filter || 'multiply')
+                if (i === 1)
+                    this.variation = color.variation || 'normal'
             },
             async colorsFromTypes() {
                 const types = this.types.split(' - ')
@@ -240,8 +251,6 @@
             saveQuery() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const newParams = new URLSearchParams({...Object.fromEntries(urlParams.entries()), ...this.$data})
-                newParams.delete('width')
-                newParams.delete('height')
                 newUrlQuery = window.location.href.split('?')[0] + '?' + newParams.toString()
             },
             colorStyle(i){
@@ -254,10 +263,13 @@
 
         computed: {
             canvasWidth() {
-                return (TEMPLATES[this.template].width * this.scale | 0) + 'px'
+                return (TEMPLATES[this.template].factory.WIDTH * this.scale | 0) + 'px'
             },
             canvasHeight() {
-                return (TEMPLATES[this.template].height * this.scale | 0) + 'px'
+                return (TEMPLATES[this.template].factory.HEIGHT * this.scale | 0) + 'px'
+            },
+            showVariations(){
+                return Object.keys(TEMPLATES[this.template].factory.VARIATIONS).length >= 2
             }
         },
     })

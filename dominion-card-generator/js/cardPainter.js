@@ -1,11 +1,25 @@
 class CardPainter {
-    WIDTH = 1403
-    HEIGHT = 2151
+    static WIDTH = 1403
+    static HEIGHT = 2151
+
+
+
+    get WIDTH() {
+        return this.constructor.WIDTH
+    }
+
+    get HEIGHT() {
+        return this.constructor.HEIGHT
+    }
 
     BASE = 'vertical'
     MASK_1 = 'verticalMask1'
-    MASK_2 = 'verticalMask2'
     MASK_UNCOLORED = 'verticalMaskUncolored'
+
+    static VARIATIONS = {
+        normal: 'verticalMask2',
+        night: 'verticalMask2Night'
+    }
 
     TITLE = {
         y: 257,
@@ -55,8 +69,10 @@ class CardPainter {
         canvas.width = this.WIDTH
         canvas.height = this.HEIGHT
         let ctx = canvas.getContext("2d");
-        ctx.globalCompositeOperation = filter.replace("*", '');
+        ctx.globalCompositeOperation = filter.replace(/[\d*]/g, '');
         ctx.fillStyle = color;
+        if (filter?.startsWith('lighter'))
+            ctx.fillStyle += filter.slice(7)
         if (filter.length && !filter.endsWith('*'))
             ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
         ctx.drawImage(this.imgs[this.BASE], 0, 0);
@@ -69,8 +85,10 @@ class CardPainter {
 
     paintBaseCard() {
         this.ctx.drawImage(this.paintedColoredImg(this.MASK_1, this.data.color[0], this.data.filter[0]), 0, 0)
-        if (this.data.filter[1] !== 'hidden')
-            this.ctx.drawImage(this.paintedColoredImg(this.MASK_2, this.data.color[1], this.data.filter[1]), 0, 0)
+        if (this.data.filter[1] !== 'hidden') {
+            const mask = this.constructor.VARIATIONS[this.data.variation] || this.constructor.VARIATIONS['default']
+            this.ctx.drawImage(this.paintedColoredImg(mask, this.data.color[1], this.data.filter[1]), 0, 0)
+        }
         this.ctx.drawImage(this.paintedColoredImg(this.MASK_UNCOLORED, 'black', ''), 0, 0)
     }
 
@@ -201,12 +219,12 @@ class CardPainter {
 }
 
 class HorizontalCardPainter extends CardPainter {
-    WIDTH = 2151
-    HEIGHT = 1403
+    static WIDTH = 2151
+    static HEIGHT = 1403
 
     BASE = 'horizontal'
     MASK_1 = 'horizontalMask1'
-    MASK_2 = 'horizontalMask2'
+    static VARIATIONS = {default: 'horizontalMask2'}
     MASK_UNCOLORED = 'horizontalMaskUncolored'
     MASK_BORDER = 'horizontalBorder'
 
