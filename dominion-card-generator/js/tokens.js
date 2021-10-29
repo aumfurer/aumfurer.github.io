@@ -288,18 +288,13 @@ class TokenIconBig extends TokenIcon {
 
     paint(ctx, x, y) {
         ctx.save()
-        ctx.translate(x / 2, y + 0.75 * this.height(ctx))
-        ctx.scale(3, 3)
-        super.paint(ctx, 0, 0);
+        ctx.translate(0, -0.2 * this.height(ctx))
+        super.paint(ctx, x, y);
         ctx.restore()
     }
 
-    height(ctx) {
-        return 3 * super.height(ctx)
-    }
-
-    width(ctx) {
-        return 3 * super.width(ctx)
+    fontSize(ctx) {
+        return 3 * super.fontSize(ctx);
     }
 
 }
