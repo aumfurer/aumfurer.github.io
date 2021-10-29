@@ -174,7 +174,7 @@
             const img = new Image();
             img.addEventListener('load', () => resolve(img_cache[url] = img));
             img.addEventListener('error', () => {
-                if (img.src.startsWith('http:'))
+                if (url.startsWith('http:'))
                     img.src = 'https://images.weserv.nl/?url=' + url
                 else
                     resolve()
