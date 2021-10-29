@@ -180,7 +180,7 @@ class CardPainter {
         const exp = this.imgs['exp']
         if (!exp)
             return
-        const scale = this.EXPANSION.width / Math.max(exp.width, exp.height) * this.data.zoom
+        const scale = this.EXPANSION.width / Math.max(exp.width, exp.height)
         this.ctx.save()
         this.ctx.translate(this.EXPANSION.x, this.EXPANSION.y)
         this.ctx.scale(scale, scale)
