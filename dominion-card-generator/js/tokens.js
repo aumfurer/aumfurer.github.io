@@ -215,7 +215,6 @@ class TokenIcon extends Token {
         let fs = 4 * this.fontSize(ctx) / (this.text.length + 3) | 0
         // return`${fs}px Minion Std`
         return `700 ${fs}px Token`
-
     }
 
     paint(ctx, x, y) {
@@ -320,28 +319,39 @@ class TokenIconVP extends Token {
     }
 
     width(ctx) {
-        ctx.save()
-        ctx.font = `700 ${this.fontSize(ctx) | 0}px Roman, Amiri`
-        const textWidth = ctx.measureText(this.text + '  ').width
-        ctx.restore()
-        return textWidth
+        let imageWidth = this.constructor.img.width / this.constructor.img.height * this.height(ctx)
+        const textWidth = this.textWidth(ctx);
+        return textWidth + imageWidth
     }
 
     paint(ctx, x, y) {
         ctx.save()
+        let dx = this.textWidth(ctx)
         ctx.font = this.font(ctx)
-        ctx.fillText(this.text, x, y)
+        this.writeText(ctx, x, y);
         const img = this.constructor.img
-        const h = ctx.measureText('   ').width
-        ctx.translate(x + ctx.measureText(this.text).width, y - 0.85 * h)
+        const h = ctx.measureText('1').actualBoundingBoxAscent * 1.3
+        ctx.translate(x + dx, y - 0.85 * h)
         const scale = h / this.constructor.img.width
         ctx.scale(scale, scale)
         ctx.drawImage(img, 0, 0);
         ctx.restore()
     }
 
+    writeText(ctx, x, y) {
+        ctx.fillText(this.text, x, y)
+    }
+
     font(ctx) {
         return `700 ${this.fontSize(ctx) | 0}px Roman, Amiri`;
+    }
+
+    textWidth(ctx) {
+        ctx.save()
+        ctx.font = this.font(ctx)
+        let res = ctx.measureText(this.text).width
+        ctx.restore()
+        return res
     }
 }
 
@@ -357,4 +367,24 @@ class BigTokenIconVP extends TokenIconVP {
         return 2.5 * super.fontSize(ctx);
     }
 
+    font(ctx) {
+        return `700 ${this.fontSize(ctx) | 0}px Token`
+    }
+
+    writeText(ctx, x, y) {
+        for (let c of this.text) {
+            ctx.fillText(c, x, y)
+            c = c === '1' ? '..' : c
+            x += ctx.measureText(c).width
+        }
+    }
+
+    textWidth(ctx) {
+        ctx.save()
+        ctx.font = this.font(ctx)
+        let text = this.text.replace(/1/g, '..')
+        let res = ctx.measureText(text).width
+        ctx.restore()
+        return res
+    }
 }
