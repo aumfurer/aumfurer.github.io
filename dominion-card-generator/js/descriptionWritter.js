@@ -1,4 +1,11 @@
-const TOKEN_PRIORITY = [TokenLine, TokenIconBig, TokenIcon, TokenKeyWordSingle, TokenKeyWord, JointToken, TokenWord]
+const TOKEN_PRIORITY = [
+    TokenLine,
+    TokenIconBig, BigTokenIconVP,
+    TokenIcon, TokenIconVP,
+    TokenKeyWordSingle, TokenKeyWord,
+    JointToken,
+    TokenWord
+]
 
 roman = fs => `${fs | 0}px Roman, Amiri`
 

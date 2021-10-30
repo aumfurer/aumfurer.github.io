@@ -296,5 +296,65 @@ class TokenIconBig extends TokenIcon {
     fontSize(ctx) {
         return 3 * super.fontSize(ctx);
     }
+}
+
+
+class TokenIconVP extends Token {
+    static name = "TokenIconVP"
+
+    static get pattern() {
+        return "([+]?\\p{N}*)%"
+    }
+
+    static img = null
+
+    /** @param {String} text */
+    constructor(text) {
+        super();
+        this.icon = text.charAt(0)
+        this.text = text.slice(0, text.length - 1)
+    }
+
+    height(ctx) {
+        return this.fontSize(ctx) * 0.90
+    }
+
+    width(ctx) {
+        ctx.save()
+        ctx.font = `700 ${this.fontSize(ctx) | 0}px Roman, Amiri`
+        const textWidth = ctx.measureText(this.text + '  ').width
+        ctx.restore()
+        return textWidth
+    }
+
+    paint(ctx, x, y) {
+        ctx.save()
+        ctx.font = this.font(ctx)
+        ctx.fillText(this.text, x, y)
+        const img = this.constructor.img
+        const h = ctx.measureText('   ').width
+        ctx.translate(x + ctx.measureText(this.text).width, y - 0.85 * h)
+        const scale = h / this.constructor.img.width
+        ctx.scale(scale, scale)
+        ctx.drawImage(img, 0, 0);
+        ctx.restore()
+    }
+
+    font(ctx) {
+        return `700 ${this.fontSize(ctx) | 0}px Roman, Amiri`;
+    }
+}
+
+
+class BigTokenIconVP extends TokenIconVP {
+    static name = "BigTokenIconVP"
+
+    static get pattern() {
+        return "^(\\p{N}*)%$"
+    }
+
+    fontSize(ctx) {
+        return 2.5 * super.fontSize(ctx);
+    }
 
 }

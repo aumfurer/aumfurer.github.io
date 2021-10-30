@@ -161,6 +161,7 @@
         '$': "img/Coin.png",
         '@': "img/Debt.png",
         '^': "img/Potion.png",
+        '%': "img/VP.png",
         img: '',
         exp: '',
     }
@@ -228,6 +229,7 @@
                     const base_imgs = await IMGS_PROMISE
                     const images = {...base_imgs, ...extra_imgs}
                     TokenIcon.img = images
+                    TokenIconVP.img = images['%']
                     let ctx = this.$refs.canvas.getContext("2d");
                     let cp = new TEMPLATES[this.template](ctx, this.$data, images)
                     cp.paint()
