@@ -94,7 +94,7 @@ class DescriptionWriter {
             .map(l => tokenize(l, TOKEN_PRIORITY))
     }
 
-    /** @param {TokenArray[]} tokens */
+    /** @param {Token[]} tokens */
     makeLine(tokens) {
         const spaceWidth = this.ctx.measureText(' ').width
 
@@ -107,7 +107,7 @@ class DescriptionWriter {
 
         for (let i = 0; i < tokens.length; i++) {
             let bunch = [tokens[i]]
-            while (i < tokens.length - 1 && !tokens[i].breaksBefore() && !tokens[i + 1].breaksAfter()) {
+            while (i < tokens.length - 1 && (!tokens[i].breaksAfter() || !tokens[i + 1].breaksBefore())) {
                 i++
                 bunch.push(tokens[i])
             }
