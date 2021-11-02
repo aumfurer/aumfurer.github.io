@@ -122,6 +122,11 @@ input[type='range'] + label {
     margin-top: 0.1em;
 }
 
+input[type='checkbox'] {
+    width: 1em;
+}
+
+
 [v-cloak] {
     display: none;
 }

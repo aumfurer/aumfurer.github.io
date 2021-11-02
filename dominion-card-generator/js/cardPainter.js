@@ -1,6 +1,7 @@
 class CardPainter {
     static WIDTH
     static HEIGHT
+    static TRAVELLER = false
 
     get WIDTH() {
         return this.constructor.WIDTH
@@ -216,6 +217,7 @@ class VerticalCardPainter extends CardPainter {
 
     static WIDTH = 1403
     static HEIGHT = 2151
+    static TRAVELLER = true
 
     get WIDTH() {
         return this.constructor.WIDTH
@@ -229,6 +231,7 @@ class VerticalCardPainter extends CardPainter {
     MASK_1 = 'verticalMask1'
     MASK_UNCOLORED = 'verticalMaskUncolored'
     MASK_FOCUS = 'verticalMaskFocus'
+    MASK_TRAVELLER = 'verticalMaskTraveller'
 
     static VARIATIONS = {
         normal: 'verticalMask2',
@@ -279,6 +282,22 @@ class VerticalCardPainter extends CardPainter {
         if (this.data.filter[1] === 'hidden' && this.data.variation === 'normal'){
             this.ctx.drawImage(this.paintedColoredImg(this.MASK_FOCUS, 'black', ''), 0, 0)
         }
+        if (this.data.traveller)
+            this.ctx.drawImage(this.getTraveller(), 0, 0)
+    }
+
+
+    getTraveller() {
+        let canvas = document.createElement("canvas");
+        canvas.width = this.WIDTH
+        canvas.height = this.HEIGHT
+        let ctx = canvas.getContext("2d");
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.scale(1/this.data.scale, 1/this.data.scale)
+        ctx.drawImage(this.ctx.canvas, 0, 0);
+        ctx.scale(this.data.scale, this.data.scale)
+        ctx.drawImage(this.imgs[this.MASK_TRAVELLER], 0, 0);
+        return canvas
     }
 }
 

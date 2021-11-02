@@ -65,8 +65,8 @@
                 <label for="resolution">Resolution:</label>
                 <select id="resolution" v-model.number="scale" @input="window.setTimeout(paintAll, 10)">
                     <option value="1">High</option>
-                    <option value="0.5">Low</option>
-                    <option value="0.4">Lowest</option>
+                    <option value="0.5">Medium</option>
+                    <option value="0.25">Small</option>
                 </select>
             </div>
         </div>
@@ -99,6 +99,9 @@
                     <option value="lighter80">Lighter 50%</option>
                     <option value="lighter40">Lighter 25%</option>
                 </select>
+                <label v-if="i===0 && showTraveller" for="traveller">Traveller:</label>
+                <input v-if="i===0 && showTraveller" id=traveller type="checkbox" v-model="traveller">
+
                 <label v-if="i===1 && showVariations" for="variation">Variation:</label>
                 <select v-if="i===1 && showVariations" v-model="variation" @change="paintAll()" id="variation">
                     <option value="normal" v-if='i===1'>Normal</option>
@@ -158,6 +161,7 @@
         horizontalMask2: 'img/horizontal-2.png',
         horizontalMaskUncolored: 'img/horizontal-uncolored.png',
         horizontalBorder: 'img/horizontal-border.png',
+        verticalMaskTraveller: 'img/vertical-traveller.png',
         '$': "img/Coin.png",
         '@': "img/Debt.png",
         '^': "img/Potion.png",
@@ -208,7 +212,7 @@
                     types: urlParams.get('types') ?? '',
                     color: urlParams.get('color')?.split(',') ?? ['#ffffff', '#ffffff'],
                     filter: urlParams.get('filter')?.split(',') ?? ["multiply", "hidden"],
-                    scale: urlParams.get('scale') ?? 1,
+                    scale: urlParams.get('scale') ?? 0.25,
                     description: urlParams.get('description') ?? '',
                     cost: urlParams.get('cost') ?? '',
                     preview: urlParams.get('preview') ?? '',
@@ -220,6 +224,7 @@
                     art: urlParams.get('art') ?? "",
                     version: urlParams.get('version') ?? '',
                     variation: urlParams.get('variation') ?? 'normal',
+                    traveller: urlParams.get('traveller') ?? 'normal',
                 }
             },
             methods: {
@@ -265,6 +270,7 @@
                         this.setColor(0, colored[0].name)
                         this.setColor(1, colored[1].name)
                     }
+                    this.traveller = types.includes('Traveller')
                     await this.paintAll()
                 },
                 saveQuery() {
@@ -291,6 +297,9 @@
                 },
                 showVariations() {
                     return Object.keys(TEMPLATES[this.template].VARIATIONS).length >= 2
+                },
+                showTraveller() {
+                    return TEMPLATES[this.template].TRAVELLER
                 },
                 templates(){
                     return Object.keys(TEMPLATES);
