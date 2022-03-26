@@ -22,7 +22,7 @@
             <div class="panel">
                 <label for="template">Template:</label>
                 <select id="template" v-model="template">
-                    <option v-for="name in templates" :value="name">{{name}}</option>
+                    <option v-for="name in templates" :value="name" v-text="name"></option>
                 </select>
             </div>
         </div>
@@ -86,18 +86,7 @@
                 <label :for="'filter'+(i+1)">Filter:</label>
                 <select v-model="filter[i]" @change="paintAll()" :id="'filter'+(i+1)">
                     <option value="hidden" v-if='i===1'>Hidden</option>
-                    <option value="multiply">Multiply</option>
-                    <option value="overlay">Overlay</option>
-                    <option value="screen">Screen</option>
-                    <option value="hard-light">Hard Light</option>
-                    <option value="hard-light*">Hard Light (inv)</option>
-                    <option value="soft-light">Soft Light</option>
-                    <option value="soft-light*">Soft Light (inv)</option>
-                    <option value="color-burn">Color Burn</option>
-                    <option value="color-burn*">Color Burn (inv)</option>
-                    <option value="color-dodge">Color Dodge</option>
-                    <option value="lighter80">Lighter 50%</option>
-                    <option value="lighter40">Lighter 25%</option>
+                    <option v-for="f in FILTERS" :value="f.code">{{f.name}}</option>
                 </select>
                 <label v-if="i===0 && showTraveller" for="traveller">Traveller:</label>
                 <input v-if="i===0 && showTraveller" id=traveller type="checkbox" v-model="traveller">
@@ -121,12 +110,27 @@
 
 <script>
 
-    function configTemplates(){
+    function configTemplates() {
         return {
             Vertical: VerticalCardPainter,
             Horizontal: HorizontalCardPainter,
         }
     }
+
+    const FILTERS = [
+        {code: "multiply", name: "Multiply"},
+        {code: "overlay", name: "Overlay"},
+        {code: "screen", name: "Screen"},
+        {code: "hard-light", name: "Hard Light"},
+        {code: "hard-light*", name: "Hard Light (inv)"},
+        {code: "soft-light", name: "Soft Light"},
+        {code: "soft-light*", name: "Soft Light (inv)"},
+        {code: "color-burn", name: "Color Burn"},
+        {code: "color-burn*", name: "Color Burn (inv)"},
+        {code: "color-dodge", name: "Color Dodge"},
+        {code: "lighter80", name: "Lighter 50"},
+        {code: "lighter40", name: "Lighter 25"},
+    ]
 
     const COLORS = [
         {name: 'SAME', filter: 'hidden'},
@@ -144,6 +148,7 @@
         {name: 'Ruins', color: '#bf9959'},
         {name: 'Shelter', color: '#FFa680', priority: -1},
         {name: 'State', color: '#c66638', filter: "screen"},
+        {name: 'Ally', color: '#6c4c09', filter: "screen"},
         {name: 'Treasure', color: '#fff28c'},
         {name: 'Victory', color: '#bfe6a6'},
         {name: 'CUSTOM'},
@@ -301,7 +306,7 @@
                 showTraveller() {
                     return TEMPLATES[this.template].TRAVELLER
                 },
-                templates(){
+                templates() {
                     return Object.keys(TEMPLATES);
                 }
             },
